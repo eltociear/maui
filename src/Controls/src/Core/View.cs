@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using Microsoft.Maui;
 using Microsoft.Maui.Controls.Internals;
 using Microsoft.Maui.Graphics;
 
@@ -10,7 +11,7 @@ namespace Microsoft.Maui.Controls
 {
 	/// <include file="../../docs/Microsoft.Maui.Controls/View.xml" path="Type[@FullName='Microsoft.Maui.Controls.View']/Docs" />
 	public partial class View : VisualElement, IViewController, IGestureController, IGestureRecognizers
-	{
+    {
 		protected internal IGestureController GestureController => this;
 
 		/// <include file="../../docs/Microsoft.Maui.Controls/View.xml" path="//Member[@MemberName='VerticalOptionsProperty']/Docs" />
@@ -183,6 +184,7 @@ namespace Microsoft.Maui.Controls
 		protected override void OnBindingContextChanged()
 		{
 			this.PropagateBindingContext(GestureRecognizers);
+
 			base.OnBindingContextChanged();
 		}
 
@@ -197,6 +199,20 @@ namespace Microsoft.Maui.Controls
 				return;
 			if (gesture is PinchGestureRecognizer && _gestureRecognizers.GetGesturesFor<PinchGestureRecognizer>().Count() > 1)
 				throw new InvalidOperationException($"Only one {nameof(PinchGestureRecognizer)} per view is allowed");
+		}
+
+        ContextFlyout _contextFlyout;
+
+		public override IContextFlyout ContextFlyout
+        {
+			get
+			{
+				if (_contextFlyout == null)
+				{
+					_contextFlyout = new ContextFlyout();
+				}
+				return _contextFlyout;
+			}
 		}
 	}
 }

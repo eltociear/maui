@@ -1,6 +1,11 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using PlatformView = Microsoft.UI.Xaml.FrameworkElement;
 
 namespace Microsoft.Maui.Handlers
@@ -95,6 +100,51 @@ namespace Microsoft.Maui.Handlers
 			{
 				var toolBar = toolbarElement.Toolbar.ToPlatform(handler.MauiContext);
 				handler.MauiContext.GetNavigationRootManager().SetToolbar(toolBar);
+			}
+		}
+
+		public static void MapContextFlyout(IViewHandler handler, IView view)
+		{
+			if (view is IContextFlyoutContainer contextFlyoutContainer)
+			{
+				MapContextFlyout(handler, contextFlyoutContainer);
+			}
+		}
+
+		internal static void MapContextFlyout(IElementHandler handler, IContextFlyoutContainer contextFlyoutContainer)
+		{
+			_ = handler.MauiContext ?? throw new InvalidOperationException($"The handler's {nameof(handler.MauiContext)} cannot be null.");
+
+			if (contextFlyoutContainer.ContextFlyout != null && contextFlyoutContainer.ContextFlyout.Any())
+			{
+				// This will set the MauiContext and get everything created first
+				var handler2 = contextFlyoutContainer.ContextFlyout.ToHandler(handler.MauiContext);
+
+
+				//var platformView = contextFlyoutContainer.ContextFlyout.ToPlatform() ?? throw new InvalidOperationException($"Unable to convert view to {typeof(PlatformView)}");
+
+				object? o;
+				if (contextFlyoutContainer.ContextFlyout is IReplaceableView replaceableView && replaceableView.ReplacedView != contextFlyoutContainer.ContextFlyout)
+					o = replaceableView.ReplacedView.ToPlatform();
+
+
+				_ = contextFlyoutContainer.ContextFlyout.Handler ?? throw new InvalidOperationException($"{nameof(MauiContext)} should have been set on parent.");
+
+				if (contextFlyoutContainer.ContextFlyout.Handler is IViewHandler viewHandler)
+				{
+					if (viewHandler.ContainerView is PlatformView containerView)
+						o = containerView;
+
+					if (viewHandler.PlatformView is PlatformView platformView)
+						o = platformView;
+				}
+
+				o = contextFlyoutContainer.ContextFlyout.Handler?.PlatformView;
+
+				if (handler.PlatformView is Microsoft.UI.Xaml.UIElement uiElement && o is FlyoutBase flyoutBase)
+				{
+					uiElement.ContextFlyout = flyoutBase;
+				}
 			}
 		}
 

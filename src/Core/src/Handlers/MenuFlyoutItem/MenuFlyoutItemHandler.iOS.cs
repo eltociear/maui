@@ -12,8 +12,39 @@ namespace Microsoft.Maui.Handlers
 	{
 		static Dictionary<int, IMenuElement> menus = new Dictionary<int, IMenuElement>();
 
+		bool IsInContextFlyout()
+		{
+			IElement? current = VirtualView;
+			while (current != null)
+			{
+				if (current is Microsoft.Maui.IContextFlyout)
+				{
+					return true;
+				}
+				current = current.Parent;
+			}
+			return false;
+		}
+
 		protected override UIMenuElement CreatePlatformElement()
 		{
+			if (IsInContextFlyout())
+			{
+				// REVIEW: It seems more straightforward to use the non-Selector UIAction because
+				// it's simpler to use and avoids the default limit of 50 selectors and dealing
+				// with other "global" things like the global menu system (which this doesn't seem
+				// to use).
+				UIImage? contextUiImage = VirtualView.Source.GetPlatformMenuImage(MauiContext!);
+
+				var uiAction = UIAction.Create(
+					title: VirtualView.Text,
+					image: contextUiImage,
+					identifier: null,
+					handler: (_) => VirtualView?.Clicked());
+
+				return uiAction;
+			}
+
 			int index = menus.Count;
 			UIImage? uiImage = VirtualView.Source.GetPlatformMenuImage(MauiContext!);
 			var selector = new Selector($"MenuItem{index}:");

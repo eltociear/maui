@@ -13,5 +13,7 @@ namespace Microsoft.Maui
 		Size GetDesiredSize(double widthConstraint, double heightConstraint);
 
 		void PlatformArrange(Rect frame);
+
+		//void SetContextFlyout(IContextFlyout contextFlyout);
 	}
 }

@@ -457,5 +457,7 @@ namespace Microsoft.Maui.Controls
 		partial void HandlePlatformUnloadedLoaded();
 
 		internal IView? ParentView => ((this as IView)?.Parent as IView);
+
+		public virtual IContextFlyout? ContextFlyout => null; // TODO: Should we try to implement this here?
 	}
 }
